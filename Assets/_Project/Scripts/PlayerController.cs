@@ -11,9 +11,9 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
     // Este método se conecta con el Input System
-    public void OnMove(InputValue value)
+    public void OnMove(InputAction.CallbackContext context)
     {
-        moveInput = value.Get<Vector2>();
+        moveInput = context.ReadValue<Vector2>();
     }
     void FixedUpdate()
     {
