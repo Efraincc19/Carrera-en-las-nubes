@@ -24,4 +24,14 @@ public class PlayerController : MonoBehaviour
         // Aplicamos el movimiento a la posición del Rigidbody
         rb.MovePosition(rb.position + forwardMove + sideMove);
     }
+
+    void Update() 
+{
+    // Si la posición en el eje Y (altura) es menor a -5
+    if (transform.position.y < -5f)
+    {
+        // Reiniciamos el nivel
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
 }
