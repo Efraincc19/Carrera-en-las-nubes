@@ -230,9 +230,9 @@ GameObject:
   - component: {fileID: 468264107}
   - component: {fileID: 468264106}
   - component: {fileID: 468264113}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -278,6 +278,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 3d4103ff-b26e-4d97-9417-182142da34d9
     m_ActionName: 'Player/Move[/Keyboard/leftArrow,/Keyboard/rightArrow]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b8a4f89d-7f72-4d7a-b5e5-f5b2b2b1b3b1
+    m_ActionName: 'Player/Jump[/Keyboard/space]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -295,8 +299,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dbba1a085e22d549812b755997814f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  forwardSpeed: 10
-  sideSpeed: 8
+  moveSpeed: 8
+  jumpForce: 5
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  groundCheck: {fileID: 704529902}
+  groundDistance: 0.2
 --- !u!54 &468264108
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -457,6 +466,11 @@ MonoBehaviour:
         m_Calls: []
   m_LegacyBlendHint: 0
   m_ComponentOwner: {fileID: 1971330053}
+--- !u!4 &704529902 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1136129813346880261, guid: 3e2a71316c9b0a24eba8987f1af733da, type: 3}
+  m_PrefabInstance: {fileID: 1891467626}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1321,7 +1335,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1971330053}
   - component: {fileID: 1971330054}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: cm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
