@@ -41,10 +41,8 @@ public class PlayerController : MonoBehaviour
             {
                 wantsToJump = true;
             }
-            else
-            {
-                Debug.LogWarning("Intento de salto fallido: isGrounded es false. ¡Asegúrate de que 'Ground Layer' está asignado correctamente al piso en Unity!");
-            }
+           
+            
         }
     }
 
