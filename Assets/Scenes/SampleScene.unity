@@ -230,7 +230,7 @@ GameObject:
   - component: {fileID: 468264107}
   - component: {fileID: 468264106}
   - component: {fileID: 468264113}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -250,7 +250,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
   m_Actions: {fileID: -944628639613478452, guid: 9f340e6c38881224c9b694886eaec123, type: 3}
-  m_NotificationBehavior: 2
+  m_NotificationBehavior: 0
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -961,6 +961,10 @@ PrefabInstance:
       propertyPath: m_VersionIndex
       value: 1184
       objectReference: {fileID: 0}
+    - target: {fileID: 1440219052505752274, guid: ca5608b258f4671448bc8f04cce28111, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 2882396557223519863, guid: ca5608b258f4671448bc8f04cce28111, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -968,6 +972,10 @@ PrefabInstance:
     - target: {fileID: 3164069971412267515, guid: ca5608b258f4671448bc8f04cce28111, type: 3}
       propertyPath: m_Name
       value: Nube_Obstaculo
+      objectReference: {fileID: 0}
+    - target: {fileID: 3164069971412267515, guid: ca5608b258f4671448bc8f04cce28111, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4178982033189828620, guid: ca5608b258f4671448bc8f04cce28111, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1300,6 +1308,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Nube_Base
       objectReference: {fileID: 0}
+    - target: {fileID: 2149319760188490482, guid: 3e2a71316c9b0a24eba8987f1af733da, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2178253938373727614, guid: 3e2a71316c9b0a24eba8987f1af733da, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -1335,7 +1347,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1971330053}
   - component: {fileID: 1971330054}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: cm
   m_TagString: Untagged
   m_Icon: {fileID: 0}

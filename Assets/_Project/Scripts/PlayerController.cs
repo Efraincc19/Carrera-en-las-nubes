@@ -27,18 +27,24 @@ public class PlayerController : MonoBehaviour
     }
 
     // Este método se conecta con el Input Action de Movimiento (Vector2)
-    public void OnMove(InputAction.CallbackContext context)
+    public void OnMove(InputValue value)
     {
-        moveInput = context.ReadValue<Vector2>();
+        moveInput = value.Get<Vector2>();
     }
 
     // Este método se conecta con el Input Action de Salto (Button)
-    public void OnJump(InputAction.CallbackContext context)
+    public void OnJump(InputValue value)
     {
-        // Detecta el momento exacto en que se presiona el botón
-        if (context.started && isGrounded)
+        if (value.isPressed)
         {
-            wantsToJump = true;
+            if (isGrounded)
+            {
+                wantsToJump = true;
+            }
+            else
+            {
+                Debug.LogWarning("Intento de salto fallido: isGrounded es false. ¡Asegúrate de que 'Ground Layer' está asignado correctamente al piso en Unity!");
+            }
         }
     }
 
@@ -52,19 +58,18 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         // 1. Movimiento en base a WASD (Ejes X y Z)
-        // moveInput.x es A/D o Flechas Izquierda/Derecha
-        // moveInput.y es W/S o Flechas Arriba/Abajo
         Vector3 moveDirection = (transform.forward * moveInput.y) + (transform.right * moveInput.x);
         
-        // Calculamos la nueva posición manteniendo la velocidad actual en Y (para que la gravedad funcione)
-        Vector3 targetMovePosition = rb.position + moveDirection * moveSpeed * Time.fixedDeltaTime;
-        rb.MovePosition(targetMovePosition);
+        // En lugar de MovePosition (que bloquea los saltos y la gravedad), usamos la velocidad
+        Vector3 targetVelocity = moveDirection * moveSpeed;
+        targetVelocity.y = rb.linearVelocity.y; // Conservamos la caída libre o el salto en progreso
+        rb.linearVelocity = targetVelocity;
 
         // 2. Lógica del Salto
         if (wantsToJump)
         {
-            // Aplicamos una fuerza hacia arriba usando Velocity Change para un salto instantáneo
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
+            // Aplicamos la fuerza de salto sobrescribiendo la velocidad en Y
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
             wantsToJump = false; // Reseteamos la petición
         }
     }
