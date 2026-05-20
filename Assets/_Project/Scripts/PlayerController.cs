@@ -9,21 +9,33 @@ public class PlayerController : MonoBehaviour
     
     [Header("Salto")]
     public float jumpForce = 5f;     // Fuerza del salto
+    public float jumpCooldown = 2f;  // Tiempo de espera entre saltos
     public LayerMask groundLayer;    // Capa del suelo para detectar si está tocando el piso
     public Transform groundCheck;    // Un objeto vacío a los pies del jugador para el CheckSphere
     public float groundDistance = 0.2f;
 
+    [Header("Respawn")]
+    public float fallThreshold = -10f; // Altura a la que el jugador reaparece
+    private Vector3 initialPosition; // Posición de inicio
+
+    private CloudSpawner cloudSpawner;
     private Vector2 moveInput;
     private Rigidbody rb;
     private bool isGrounded;
     private bool wantsToJump;
+    private float nextJumpTime;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        cloudSpawner = FindObjectOfType<CloudSpawner>(); // Buscamos el spawner en la escena automáticamente
+
         
         // Evita que el Rigidbody rote por colisiones si es un juego en tercera/primera persona
         rb.freezeRotation = true; 
+        
+        // Guardamos la posición inicial al iniciar la escena
+        initialPosition = transform.position;
     }
 
     // Este método se conecta con el Input Action de Movimiento (Vector2)
@@ -37,12 +49,10 @@ public class PlayerController : MonoBehaviour
     {
         if (value.isPressed)
         {
-            if (isGrounded)
+            if (isGrounded && Time.time >= nextJumpTime)
             {
                 wantsToJump = true;
             }
-           
-            
         }
     }
 
@@ -51,6 +61,12 @@ public class PlayerController : MonoBehaviour
         // Comprobamos si el jugador está tocando el suelo
         // Nota: Asegúrate de asignar la capa (Layer) de tu suelo en el inspector
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundLayer);
+
+        // Si el jugador cae por debajo del umbral, lo regresamos al punto de inicio
+        if (transform.position.y < fallThreshold)
+        {
+            Respawn();
+        }
     }
 
     void FixedUpdate()
@@ -69,6 +85,7 @@ public class PlayerController : MonoBehaviour
             // Aplicamos la fuerza de salto sobrescribiendo la velocidad en Y
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
             wantsToJump = false; // Reseteamos la petición
+            nextJumpTime = Time.time + jumpCooldown;
         }
     }
 
@@ -79,6 +96,18 @@ public class PlayerController : MonoBehaviour
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(groundCheck.position, groundDistance);
+        }
+    }
+
+    private void Respawn()
+    {
+        transform.position = initialPosition; // Vuelve a la posición inicial
+        rb.linearVelocity = Vector3.zero;     // Quita la inercia/velocidad de caída
+
+        // Reiniciamos la generación de nubes
+        if (cloudSpawner != null)
+        {
+            cloudSpawner.ResetSpawner();
         }
     }
 }

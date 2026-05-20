@@ -60,4 +60,26 @@ public class CloudSpawner : MonoBehaviour
         Destroy(activeClouds[0]);
         activeClouds.RemoveAt(0);
     }
+
+    public void ResetSpawner()
+    {
+        // Destruir todas las nubes activas
+        foreach (GameObject cloud in activeClouds)
+        {
+            if (cloud != null)
+            {
+                Destroy(cloud);
+            }
+        }
+        
+        // Limpiar la lista y reiniciar la posición Z
+        activeClouds.Clear();
+        spawnZ = 0.0f;
+        
+        // Volver a instanciar las nubes iniciales
+        for (int i = 0; i < safeAmount; i++)
+        {
+            SpawnTile();
+        }
+    }
 }
