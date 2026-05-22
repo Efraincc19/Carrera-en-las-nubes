@@ -140,7 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 105730726
+  GlobalObjectIdHash: 3360444796
   InScenePlacedSourceGlobalObjectIdHash: 3360444796
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -162,8 +162,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 15
-  jumpForce: 6.9
-  jumpCooldown: 2
+  jumpForce: 10
+  jumpCooldown: 2.5
   groundLayer:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -241,7 +241,7 @@ MonoBehaviour:
   m_Priority: 10
   m_StandbyUpdate: 2
   m_LookAt: {fileID: 8750659411818003694}
-  m_Follow: {fileID: 7833312077313625497}
+  m_Follow: {fileID: 8750659411818003694}
   m_Lens:
     FieldOfView: 40
     OrthographicSize: 10

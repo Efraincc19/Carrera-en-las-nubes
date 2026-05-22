@@ -10,6 +10,9 @@ public class MainMenuController : MonoBehaviour
     public TMP_InputField ipInputField;
     public Button hostButton;
     public Button joinButton;
+    
+    [Header("Menu Panel (Arrástralo aquí)")]
+    public GameObject menuCanvasObject;
 
     void Start()
     {
@@ -60,6 +63,13 @@ public class MainMenuController : MonoBehaviour
 
     private void HideMenu()
     {
+        // Si el usuario nos dijo explícitamente cuál es el menú, lo apagamos:
+        if (menuCanvasObject != null)
+        {
+            menuCanvasObject.SetActive(false);
+            return;
+        }
+
         // Buscar el Canvas padre y apagarlo completo (asegura que todo el menú desaparezca)
         Canvas menuCanvas = GetComponentInParent<Canvas>();
         if (menuCanvas != null)
@@ -68,7 +78,7 @@ public class MainMenuController : MonoBehaviour
         }
         else
         {
-            // Fallback: si no está en un Canvas, apagar el objeto
+            // Fallback: si no está en un Canvas y no asignó el objeto, apagar este objeto
             gameObject.SetActive(false);
         }
     }

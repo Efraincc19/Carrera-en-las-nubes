@@ -623,6 +623,7 @@ MonoBehaviour:
   ipInputField: {fileID: 1431677183}
   hostButton: {fileID: 1745375861}
   joinButton: {fileID: 1167317684}
+  menuCanvasObject: {fileID: 1056282176}
 --- !u!4 &836709509
 Transform:
   m_ObjectHideFlags: 0
