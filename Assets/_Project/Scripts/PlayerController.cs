@@ -26,6 +26,11 @@ public class PlayerController : NetworkBehaviour
     [Tooltip("Asigna aquí el AudioListener de la cámara del jugador (opcional)")]
     public AudioListener playerAudioListener;
 
+    [Header("Ajuste 3ra Persona Automático")]
+    [Tooltip("Puedes cambiar estos números en cualquier momento para alejar/acercar la cámara")]
+    public Vector3 offsetCamara = new Vector3(0, 5.5f, -10f); // Más lejos y un poco más alta
+    public Vector3 rotacionCamara = new Vector3(20f, 0, 0);   // Inclinación hacia abajo
+
     private CloudSpawner cloudSpawner;
     private PlayerInput playerInput;
     private InputAction jumpInputAction;
@@ -37,10 +42,24 @@ public class PlayerController : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        // Buscar automáticamente la cámara si olvidaste asignarla en el Unity Editor
+        if (playerCamera == null)
+            playerCamera = GetComponentInChildren<Camera>(true);
+            
+        if (playerAudioListener == null && playerCamera != null)
+            playerAudioListener = playerCamera.GetComponent<AudioListener>();
+
         if (IsOwner)
         {
             // Activar la cámara personal de este jugador
-            if (playerCamera != null) playerCamera.gameObject.SetActive(true);
+            if (playerCamera != null) 
+            {
+                playerCamera.gameObject.SetActive(true);
+                // ¡Obligamos por código a que la cámara se aleje a la tercera persona sin importar el prefab!
+                playerCamera.transform.localPosition = offsetCamara;
+                playerCamera.transform.localEulerAngles = rotacionCamara;
+            }
+
             if (playerAudioListener != null) playerAudioListener.enabled = true;
 
             // Apagar la cámara principal de la escena (la del menú)
