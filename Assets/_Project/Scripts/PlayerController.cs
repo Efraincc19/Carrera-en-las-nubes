@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem; // Necesario para el nuevo sistema
 using Unity.Netcode; // For multiplayer
+using TMPro; // ¡VITAL! Para que el script entienda qué es TextMeshPro
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : NetworkBehaviour
@@ -8,7 +9,7 @@ public class PlayerController : NetworkBehaviour
     [Header("Movimiento")]
     public float moveSpeed = 8f;         // Velocidad de movimiento general (WASD)
     [Tooltip("Qué tan rápido frena al soltar las teclas. Valores bajos = más deslizamiento (efecto nube). Valores altos = frena antes.")]
-    public float frenadoInercia = 3f;    // ¡NUEVA VARIABLE PARA LA INERCIA!
+    public float frenadoInercia = 3f;
 
     [Header("Salto")]
     public float jumpForce = 8f;     // Fuerza del salto (Aumentada para mayor rango)
@@ -32,6 +33,12 @@ public class PlayerController : NetworkBehaviour
     [Tooltip("Puedes cambiar estos números en cualquier momento para alejar/acercar la cámara")]
     public Vector3 offsetCamara = new Vector3(0, 5.5f, -10f); // Más lejos y un poco más alta
     public Vector3 rotacionCamara = new Vector3(20f, 0, 0);   // Inclinación hacia abajo
+
+    [Header("HUD de Puntuación (¡NUEVO!)")]
+    public GameObject hudCanvas;       // Casilla para arrastrar tu Canvas
+    public TMP_Text scoreText;         // Casilla para arrastrar tu TextoContador
+    private int score = 0;             // El número de nubes recolectadas
+    private GameObject lastTouchedCloud; // Evita que una misma nube te dé mil puntos
 
     private CloudSpawner cloudSpawner;
     private PlayerInput playerInput;
@@ -61,6 +68,10 @@ public class PlayerController : NetworkBehaviour
 
             if (playerAudioListener != null) playerAudioListener.enabled = true;
 
+            // ¡NUEVO! Activamos NUESTRO HUD en nuestra pantalla
+            if (hudCanvas != null) hudCanvas.SetActive(true);
+            UpdateScoreUI();
+
             if (Camera.main != null && Camera.main != playerCamera)
             {
                 Camera.main.gameObject.SetActive(false);
@@ -70,6 +81,9 @@ public class PlayerController : NetworkBehaviour
         {
             if (playerCamera != null) playerCamera.gameObject.SetActive(false);
             if (playerAudioListener != null) playerAudioListener.enabled = false;
+
+            // ¡NUEVO! Ocultamos el HUD de los clones de otros jugadores
+            if (hudCanvas != null) hudCanvas.SetActive(false);
         }
     }
 
@@ -153,26 +167,44 @@ public class PlayerController : NetworkBehaviour
     {
         if (!IsOwner) return;
 
-        // 1. Calcular la dirección deseada según los inputs
         Vector3 moveDirection = (transform.forward * moveInput.y) + (transform.right * moveInput.x);
         Vector3 targetVelocityH = moveDirection * moveSpeed;
 
-        // Separamos la velocidad actual en los ejes horizontales (X, Z)
         Vector3 currentVelocityH = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-
-        // ¡AQUÍ ESTÁ EL CAMBIO MÁGICO!
-        // Interpolamos de la velocidad actual a la deseada de forma progresiva
         Vector3 smoothedVelocityH = Vector3.Lerp(currentVelocityH, targetVelocityH, Time.fixedDeltaTime * frenadoInercia);
 
-        // Volvemos a armar el vector de velocidad respetando el eje Y de la física/salto
         rb.linearVelocity = new Vector3(smoothedVelocityH.x, rb.linearVelocity.y, smoothedVelocityH.z);
 
-        // 2. Lógica del Salto
         if (wantsToJump)
         {
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
             wantsToJump = false;
             nextJumpTime = Time.time + jumpCooldown;
+        }
+    }
+
+    // ¡NUEVO! Detecta cuando pisas una nube con el Tag "Cloud"
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (!IsOwner) return;
+
+        if (collision.gameObject.CompareTag("Cloud"))
+        {
+            if (collision.gameObject != lastTouchedCloud)
+            {
+                score++;
+                lastTouchedCloud = collision.gameObject;
+                UpdateScoreUI();
+            }
+        }
+    }
+
+    // ¡NUEVO! Actualiza el texto en la pantalla
+    void UpdateScoreUI()
+    {
+        if (scoreText != null)
+        {
+            scoreText.text = "Nubes: " + score;
         }
     }
 
@@ -190,9 +222,11 @@ public class PlayerController : NetworkBehaviour
         transform.position = initialPosition;
         rb.linearVelocity = Vector3.zero;
 
-        if (cloudSpawner != null)
-        {
-            cloudSpawner.ResetSpawner();
-        }
+        // Reseteamos los puntos del jugador al morir
+        score = 0;
+        lastTouchedCloud = null;
+        UpdateScoreUI();
+
+       
     }
 }
