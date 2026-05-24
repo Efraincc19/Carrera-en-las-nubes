@@ -2,14 +2,14 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
 using TMPro;
-using System.Collections.Generic; // ¡NUEVO! Necesario para usar listas avanzadas (HashSet)
+using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : NetworkBehaviour
 {
     [Header("Movimiento")]
     public float moveSpeed = 8f;
-    [Tooltip("Qué tan rápido frena al soltar las teclas. Valores bajos = más deslizamiento (efecto nube). Valores altos = frena antes.")]
+    [Tooltip("Qué tan rápido frena al soltar las teclas. Valores bajos = más deslizamiento (efecto nube).")]
     public float frenadoInercia = 3f;
 
     [Header("Salto")]
@@ -35,9 +35,13 @@ public class PlayerController : NetworkBehaviour
     public GameObject hudCanvas;
     public TMP_Text scoreText;
     private int score = 0;
-
-    // ¡NUEVO! Una lista negra donde guardaremos el ID de cada nube pisada
     private HashSet<int> nubesVisitadas = new HashSet<int>();
+
+    [Header("Efectos de Sonido (¡NUEVO!)")]
+    [Tooltip("Arrastra aquí el componente AudioSource de este Player")]
+    public AudioSource audioSource;
+    [Tooltip("Arrastra aquí tu archivo de sonido (.mp3 o .wav)")]
+    public AudioClip sonidoPunto;
 
     private CloudSpawner cloudSpawner;
     private PlayerInput playerInput;
@@ -87,6 +91,9 @@ public class PlayerController : NetworkBehaviour
     {
         rb = GetComponent<Rigidbody>();
         playerInput = GetComponent<PlayerInput>();
+
+        // Si olvidaste asignar el AudioSource en el inspector, intentamos buscarlo automáticamente
+        if (audioSource == null) audioSource = GetComponent<AudioSource>();
     }
 
     private void OnEnable()
@@ -178,32 +185,31 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    // ¡SISTEMA DE COLISIÓN MEJORADO!
     private void OnCollisionEnter(Collision collision)
     {
         if (!IsOwner) return;
 
-        // ¡ESTO MANDARÁ UN MENSAJE A LA CONSOLA! Nos dirá exactamente qué estás pisando
-        Debug.Log($"[DEBUG CHOCANDO] Pisé: '{collision.gameObject.name}' | Su Tag es: '{collision.gameObject.tag}'");
-
-        // Comprobamos si el objeto que pisamos TIENE el tag "Cloud", O si su objeto Padre lo tiene
         bool esNube = collision.gameObject.CompareTag("Cloud") ||
                      (collision.transform.parent != null && collision.transform.parent.CompareTag("Cloud"));
 
         if (esNube)
         {
-            // Conseguimos el objeto principal de la nube para registrar su ID único
             GameObject objetoNube = collision.gameObject.CompareTag("Cloud") ? collision.gameObject : collision.transform.parent.gameObject;
             int nubeID = objetoNube.GetInstanceID();
 
-            // Si no la hemos visitado, sumamos punto
             if (!nubesVisitadas.Contains(nubeID))
             {
                 nubesVisitadas.Add(nubeID);
                 score++;
                 UpdateScoreUI();
 
-                Debug.Log($"¡Punto anotado con éxito! Nube ID: {nubeID}. Puntuación actual: {score}");
+                // ¡NUEVO! Reproduce el sonidito una sola vez sin interrumpir otros audios
+                if (audioSource != null && sonidoPunto != null)
+                {
+                    audioSource.PlayOneShot(sonidoPunto);
+                }
+
+                Debug.Log($"¡Punto anotado! Nube ID: {nubeID}. Puntuación: {score}");
             }
         }
     }
@@ -221,18 +227,8 @@ public class PlayerController : NetworkBehaviour
         transform.position = initialPosition;
         rb.linearVelocity = Vector3.zero;
 
-        // Al morir, limpiamos los puntos y la lista de nubes visitadas para empezar de cero
         score = 0;
         nubesVisitadas.Clear();
         UpdateScoreUI();
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        if (groundCheck != null)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(groundCheck.position, groundDistance);
-        }
     }
 }
