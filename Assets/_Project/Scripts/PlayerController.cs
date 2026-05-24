@@ -9,19 +9,15 @@ public class PlayerController : NetworkBehaviour
 {
     [Header("Movimiento")]
     public float moveSpeed = 8f;
-    [Tooltip("Qué tan rápido frena al soltar las teclas. Valores bajos = más deslizamiento (efecto nube).")]
+    [Tooltip("Qué tan rápido frena al soltar las teclas.")]
     public float frenadoInercia = 3f;
 
     [Header("Salto")]
     public float jumpForce = 8f;
-    public float jumpCooldown = 2f;
+    public float jumpCooldown = 0.5f;
     public LayerMask groundLayer;
     public Transform groundCheck;
     public float groundDistance = 0.2f;
-
-    [Header("Respawn")]
-    public float fallThreshold = -10f;
-    private Vector3 initialPosition;
 
     [Header("Cámara Multijugador")]
     public Camera playerCamera;
@@ -37,12 +33,11 @@ public class PlayerController : NetworkBehaviour
     private int score = 0;
     private HashSet<int> nubesVisitadas = new HashSet<int>();
 
-    [Header("Efectos de Sonido (¡NUEVO!)")]
-    [Tooltip("Arrastra aquí el componente AudioSource de este Player")]
+    [Header("Efectos de Sonido")]
     public AudioSource audioSource;
-    [Tooltip("Arrastra aquí tu archivo de sonido (.mp3 o .wav)")]
     public AudioClip sonidoPunto;
 
+    private int saltosRestantes = 2;
     private CloudSpawner cloudSpawner;
     private PlayerInput playerInput;
     private InputAction jumpInputAction;
@@ -91,8 +86,6 @@ public class PlayerController : NetworkBehaviour
     {
         rb = GetComponent<Rigidbody>();
         playerInput = GetComponent<PlayerInput>();
-
-        // Si olvidaste asignar el AudioSource en el inspector, intentamos buscarlo automáticamente
         if (audioSource == null) audioSource = GetComponent<AudioSource>();
     }
 
@@ -116,7 +109,6 @@ public class PlayerController : NetworkBehaviour
     {
         cloudSpawner = FindObjectOfType<CloudSpawner>();
         rb.freezeRotation = true;
-        initialPosition = transform.position;
     }
 
     public void OnMove(InputValue value)
@@ -142,8 +134,11 @@ public class PlayerController : NetworkBehaviour
     private void TryRequestJump()
     {
         if (!IsOwner) return;
-        if (isGrounded && Time.time >= nextJumpTime)
+        if (saltosRestantes > 0)
+        {
+            if (saltosRestantes == 2 && Time.time < nextJumpTime) return;
             wantsToJump = true;
+        }
     }
 
     void Update()
@@ -157,11 +152,6 @@ public class PlayerController : NetworkBehaviour
         else
         {
             isGrounded = Physics.Raycast(transform.position, Vector3.down, groundDistance + 0.1f, groundLayer);
-        }
-
-        if (transform.position.y < fallThreshold)
-        {
-            Respawn();
         }
     }
 
@@ -177,11 +167,21 @@ public class PlayerController : NetworkBehaviour
 
         rb.linearVelocity = new Vector3(smoothedVelocityH.x, rb.linearVelocity.y, smoothedVelocityH.z);
 
+        // === ¡MÁGICA MODIFICACIÓN DEL SALTO DOBLE! ===
         if (wantsToJump)
         {
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
+            // Si saltosRestantes es igual a 1, significa que ya gastamos el primero,
+            // por lo tanto, este es el segundo salto y va a la mitad de fuerza.
+            float fuerzaDelSaltoActual = (saltosRestantes == 1) ? jumpForce * 0.6f : jumpForce;
+
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, fuerzaDelSaltoActual, rb.linearVelocity.z);
             wantsToJump = false;
-            nextJumpTime = Time.time + jumpCooldown;
+            saltosRestantes--;
+
+            if (saltosRestantes == 1)
+            {
+                nextJumpTime = Time.time + jumpCooldown;
+            }
         }
     }
 
@@ -194,6 +194,8 @@ public class PlayerController : NetworkBehaviour
 
         if (esNube)
         {
+            saltosRestantes = 2;
+
             GameObject objetoNube = collision.gameObject.CompareTag("Cloud") ? collision.gameObject : collision.transform.parent.gameObject;
             int nubeID = objetoNube.GetInstanceID();
 
@@ -203,13 +205,10 @@ public class PlayerController : NetworkBehaviour
                 score++;
                 UpdateScoreUI();
 
-                // ¡NUEVO! Reproduce el sonidito una sola vez sin interrumpir otros audios
                 if (audioSource != null && sonidoPunto != null)
                 {
                     audioSource.PlayOneShot(sonidoPunto);
                 }
-
-                Debug.Log($"¡Punto anotado! Nube ID: {nubeID}. Puntuación: {score}");
             }
         }
     }
@@ -222,13 +221,9 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    private void Respawn()
+    public void RestablecerSaltos()
     {
-        transform.position = initialPosition;
-        rb.linearVelocity = Vector3.zero;
-
-        score = 0;
-        nubesVisitadas.Clear();
-        UpdateScoreUI();
+        saltosRestantes = 2;
+        moveInput = Vector2.zero;
     }
 }
