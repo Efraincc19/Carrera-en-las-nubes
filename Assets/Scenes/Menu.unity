@@ -155,7 +155,7 @@ MonoBehaviour:
     PlayerPrefab: {fileID: 3355365119389455091, guid: 6f08f109799ae184c995f5ba79221ad7, type: 3}
     Prefabs:
       NetworkPrefabsLists:
-      - {fileID: 11400000, guid: 1aa4e0621ed35834ea96026365fbdc89, type: 2}
+      - {fileID: 11400000, guid: e5e0f9b29615ac0439e299808c32f30f, type: 2}
     TickRate: 30
     ClientConnectionBufferTimeout: 10
     ConnectionApproval: 0
@@ -892,6 +892,7 @@ GameObject:
   - component: {fileID: 1156668119}
   - component: {fileID: 1156668121}
   - component: {fileID: 1156668120}
+  - component: {fileID: 1156668122}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -915,7 +916,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -90, y: 160}
+  m_AnchoredPosition: {x: -1200, y: 160}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1156668120
@@ -1018,6 +1019,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1156668118}
   m_CullTransparentMesh: 1
+--- !u!114 &1156668122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1156668118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 174662682b0bfd54ca67b7920751558b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimarTitulo
+  duracion: 1.4
+  retrasoInicial: 0.3
 --- !u!1 &1167317683
 GameObject:
   m_ObjectHideFlags: 0
@@ -1501,11 +1516,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b9aedac6017d344cbc1789d208d3433, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CambiarFondo
-  colorDeFondo:
-    r: 0.58472764
-    g: 0.80817735
-    b: 0.82641506
-    a: 1
 --- !u!1 &1745375857
 GameObject:
   m_ObjectHideFlags: 0
@@ -1637,6 +1647,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1800175045}
   - component: {fileID: 1800175046}
+  - component: {fileID: 1800175047}
   m_Layer: 0
   m_Name: LevelManager
   m_TagString: Untagged
@@ -1676,10 +1687,30 @@ MonoBehaviour:
   - {fileID: 7373157029365902322, guid: beec4f6a1ca006146a93168534c4897d, type: 3}
   - {fileID: 4461858634758193569, guid: 7563bf4d419e15d47a8eca20f4a22002, type: 3}
   - {fileID: 446419277859418242, guid: bcb238ce937597344afe66eab6d0490b, type: 3}
-  playerTransform: {fileID: 0}
   maxVariacionX: 4
   minAlturaY: 0.5
   maxAlturaY: 3.5
+--- !u!114 &1800175047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1800175044}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 2305674856
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &2078720057
 GameObject:
   m_ObjectHideFlags: 0

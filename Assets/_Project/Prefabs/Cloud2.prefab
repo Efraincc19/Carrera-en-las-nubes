@@ -75,6 +75,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e8ddf8eca9a2cec418db7e5acb9fbc8a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9048205439247408278}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e8ddf8eca9a2cec418db7e5acb9fbc8a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -7697057619936469158}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e8ddf8eca9a2cec418db7e5acb9fbc8a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3111071027722301547}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e8ddf8eca9a2cec418db7e5acb9fbc8a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -6152413070336739304}
   m_SourcePrefab: {fileID: 100100000, guid: e8ddf8eca9a2cec418db7e5acb9fbc8a, type: 3}
 --- !u!1 &7373157029365902322 stripped
 GameObject:
@@ -102,3 +111,69 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.37476945, y: 0.18738471, z: 0.18738467}
   m_Center: {x: -0.000000052154064, y: 0, z: 0}
+--- !u!114 &-7697057619936469158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7373157029365902322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 3162966266
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+--- !u!114 &3111071027722301547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7373157029365902322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Netcode.Components::Unity.Netcode.Components.NetworkTransform
+  UseUnreliableDeltas: 0
+  SyncPositionX: 1
+  SyncPositionY: 1
+  SyncPositionZ: 1
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
+  SyncScaleX: 1
+  SyncScaleY: 1
+  SyncScaleZ: 1
+  PositionThreshold: 0.001
+  RotAngleThreshold: 0.01
+  ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
+  InLocalSpace: 0
+  Interpolate: 1
+  SlerpPosition: 0
+--- !u!114 &-6152413070336739304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7373157029365902322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6700a5c995980e340961e1c03ec0fce6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NubeMovil
+  velocidad: 3
+  distancia: 14
