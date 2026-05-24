@@ -14,9 +14,9 @@ public class CloudSpawner : MonoBehaviour
 
     [Header("Variación del Camino")]
     // Modifica estos valores en el inspector para controlar qué tan esparcidas están
-    public float maxVariacionX = 6.0f; // Qué tan a la izquierda o derecha pueden aparecer
-    public float minAlturaY = -3.5f;   // Altura mínima (ahora debajo del mundo)
-    public float maxAlturaY = -1.5f;   // Altura máxima (ahora debajo del mundo)
+    public float maxVariacionX = 14.0f; // Qué tan a la izquierda o derecha pueden aparecer
+    public float minAlturaY = -3.0f;   // Altura mínima (ahora debajo del mundo)
+    public float maxAlturaY = -1.2f;   // Altura máxima (ahora debajo del mundo)
 
     void Start()
     {

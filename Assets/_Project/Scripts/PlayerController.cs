@@ -6,8 +6,10 @@ using Unity.Netcode; // For multiplayer
 public class PlayerController : NetworkBehaviour
 {
     [Header("Movimiento")]
-    public float moveSpeed = 8f;     // Velocidad de movimiento general (WASD)
-    
+    public float moveSpeed = 8f;         // Velocidad de movimiento general (WASD)
+    [Tooltip("Qué tan rápido frena al soltar las teclas. Valores bajos = más deslizamiento (efecto nube). Valores altos = frena antes.")]
+    public float frenadoInercia = 3f;    // ¡NUEVA VARIABLE PARA LA INERCIA!
+
     [Header("Salto")]
     public float jumpForce = 8f;     // Fuerza del salto (Aumentada para mayor rango)
     public float jumpCooldown = 2f;  // Tiempo de espera entre saltos
@@ -22,7 +24,7 @@ public class PlayerController : NetworkBehaviour
     [Header("Cámara Multijugador")]
     [Tooltip("Asigna aquí la cámara hija del jugador (si la hay)")]
     public Camera playerCamera;
-    
+
     [Tooltip("Asigna aquí el AudioListener de la cámara del jugador (opcional)")]
     public AudioListener playerAudioListener;
 
@@ -42,27 +44,23 @@ public class PlayerController : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        // Buscar automáticamente la cámara si olvidaste asignarla en el Unity Editor
         if (playerCamera == null)
             playerCamera = GetComponentInChildren<Camera>(true);
-            
+
         if (playerAudioListener == null && playerCamera != null)
             playerAudioListener = playerCamera.GetComponent<AudioListener>();
 
         if (IsOwner)
         {
-            // Activar la cámara personal de este jugador
-            if (playerCamera != null) 
+            if (playerCamera != null)
             {
                 playerCamera.gameObject.SetActive(true);
-                // ¡Obligamos por código a que la cámara se aleje a la tercera persona sin importar el prefab!
                 playerCamera.transform.localPosition = offsetCamara;
                 playerCamera.transform.localEulerAngles = rotacionCamara;
             }
 
             if (playerAudioListener != null) playerAudioListener.enabled = true;
 
-            // Apagar la cámara principal de la escena (la del menú)
             if (Camera.main != null && Camera.main != playerCamera)
             {
                 Camera.main.gameObject.SetActive(false);
@@ -70,7 +68,6 @@ public class PlayerController : NetworkBehaviour
         }
         else
         {
-            // Si este jugador NO es el nuestro, apagar su cámara
             if (playerCamera != null) playerCamera.gameObject.SetActive(false);
             if (playerAudioListener != null) playerAudioListener.enabled = false;
         }
@@ -100,24 +97,17 @@ public class PlayerController : NetworkBehaviour
 
     void Start()
     {
-        cloudSpawner = FindObjectOfType<CloudSpawner>(); // Buscamos el spawner en la escena automáticamente
-
-        
-        // Evita que el Rigidbody rote por colisiones si es un juego en tercera/primera persona
-        rb.freezeRotation = true; 
-        
-        // Guardamos la posición inicial al iniciar la escena
+        cloudSpawner = FindObjectOfType<CloudSpawner>();
+        rb.freezeRotation = true;
         initialPosition = transform.position;
     }
 
-    // Este método se conecta con el Input Action de Movimiento (Vector2)
     public void OnMove(InputValue value)
     {
         if (!IsOwner) return;
         moveInput = value.Get<Vector2>();
     }
 
-    // Este método se conecta con el Input Action de Salto (Button)
     public void OnJump(InputValue value)
     {
         if (!IsOwner) return;
@@ -141,10 +131,8 @@ public class PlayerController : NetworkBehaviour
 
     void Update()
     {
-        if (!IsOwner) return; // Solo controlamos nuestro propio jugador
+        if (!IsOwner) return;
 
-        // Comprobamos si el jugador está tocando el suelo
-        // Nota: Asegúrate de asignar la capa (Layer) de tu suelo en el inspector
         if (groundCheck != null)
         {
             isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundLayer);
@@ -155,7 +143,6 @@ public class PlayerController : NetworkBehaviour
             isGrounded = Physics.Raycast(transform.position, Vector3.down, groundDistance + 0.1f, groundLayer);
         }
 
-        // Si el jugador cae por debajo del umbral, lo regresamos al punto de inicio
         if (transform.position.y < fallThreshold)
         {
             Respawn();
@@ -164,27 +151,31 @@ public class PlayerController : NetworkBehaviour
 
     void FixedUpdate()
     {
-        if (!IsOwner) return; // Permitir que el NetworkTransform o ClientNetworkTransform sincronice esto para los demas
-        
-        // 1. Movimiento en base a WASD (Ejes X y Z)
+        if (!IsOwner) return;
+
+        // 1. Calcular la dirección deseada según los inputs
         Vector3 moveDirection = (transform.forward * moveInput.y) + (transform.right * moveInput.x);
-        
-        // En lugar de MovePosition (que bloquea los saltos y la gravedad), usamos la velocidad
-        Vector3 targetVelocity = moveDirection * moveSpeed;
-        targetVelocity.y = rb.linearVelocity.y; // Conservamos la caída libre o el salto en progreso
-        rb.linearVelocity = targetVelocity;
+        Vector3 targetVelocityH = moveDirection * moveSpeed;
+
+        // Separamos la velocidad actual en los ejes horizontales (X, Z)
+        Vector3 currentVelocityH = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+
+        // ¡AQUÍ ESTÁ EL CAMBIO MÁGICO!
+        // Interpolamos de la velocidad actual a la deseada de forma progresiva
+        Vector3 smoothedVelocityH = Vector3.Lerp(currentVelocityH, targetVelocityH, Time.fixedDeltaTime * frenadoInercia);
+
+        // Volvemos a armar el vector de velocidad respetando el eje Y de la física/salto
+        rb.linearVelocity = new Vector3(smoothedVelocityH.x, rb.linearVelocity.y, smoothedVelocityH.z);
 
         // 2. Lógica del Salto
         if (wantsToJump)
         {
-            // Aplicamos la fuerza de salto sobrescribiendo la velocidad en Y
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
-            wantsToJump = false; // Reseteamos la petición
+            wantsToJump = false;
             nextJumpTime = Time.time + jumpCooldown;
         }
     }
 
-    // Opcional: Dibuja la esfera de detección de suelo en el editor para guiarte
     private void OnDrawGizmosSelected()
     {
         if (groundCheck != null)
@@ -196,10 +187,9 @@ public class PlayerController : NetworkBehaviour
 
     private void Respawn()
     {
-        transform.position = initialPosition; // Vuelve a la posición inicial
-        rb.linearVelocity = Vector3.zero;     // Quita la inercia/velocidad de caída
+        transform.position = initialPosition;
+        rb.linearVelocity = Vector3.zero;
 
-        // Reiniciamos la generación de nubes
         if (cloudSpawner != null)
         {
             cloudSpawner.ResetSpawner();
