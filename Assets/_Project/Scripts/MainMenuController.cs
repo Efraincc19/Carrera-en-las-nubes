@@ -14,6 +14,23 @@ public class MainMenuController : MonoBehaviour
     [Header("Menu Panel (Arrástralo aquí)")]
     public GameObject menuCanvasObject;
 
+    private GameObject mobileControlsCanvas;
+
+    void Awake()
+    {
+        // Encontrar el canvas de controles móviles al inicio cuando todavía está activo
+        GameObject joystickFondo = GameObject.Find("Joytick_Fondo");
+        if (joystickFondo != null)
+        {
+            Canvas parentCanvas = joystickFondo.GetComponentInParent<Canvas>();
+            if (parentCanvas != null)
+            {
+                mobileControlsCanvas = parentCanvas.gameObject;
+                mobileControlsCanvas.SetActive(false); // Ocultar al inicio para que no moleste en el menú
+            }
+        }
+    }
+
     void Start()
     {
         // Asignar listeners a los botones
@@ -34,6 +51,7 @@ public class MainMenuController : MonoBehaviour
         {
             NetworkManager.Singleton.StartHost();
             HideMenu();
+            ShowMobileControls();
         }
         else
         {
@@ -59,6 +77,15 @@ public class MainMenuController : MonoBehaviour
 
         NetworkManager.Singleton.StartClient();
         HideMenu();
+        ShowMobileControls();
+    }
+
+    private void ShowMobileControls()
+    {
+        if (mobileControlsCanvas != null)
+        {
+            mobileControlsCanvas.SetActive(true);
+        }
     }
 
     private void HideMenu()
