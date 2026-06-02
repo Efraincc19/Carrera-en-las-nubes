@@ -719,9 +719,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Join
-
-'
+  m_text: Unirse a partida
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a27707340d9d58c4e955849f1c76f848, type: 2}
   m_sharedMaterial: {fileID: -9151577117136223424, guid: a27707340d9d58c4e955849f1c76f848, type: 2}
@@ -926,7 +924,7 @@ GameObject:
   - component: {fileID: 803229169}
   - component: {fileID: 803229168}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: ControlesTactiles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1363,7 +1361,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Host
+  m_text: Crear Partida
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a27707340d9d58c4e955849f1c76f848, type: 2}
   m_sharedMaterial: {fileID: -9151577117136223424, guid: a27707340d9d58c4e955849f1c76f848, type: 2}
@@ -1713,8 +1711,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -25, y: -90}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: -14.0403, y: -80.2415}
+  m_SizeDelta: {x: 251.7394, y: 49.517}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1431677179
 GameObject:
@@ -1752,7 +1750,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -25, y: -130}
+  m_AnchoredPosition: {x: -12, y: -130}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1431677181
@@ -1983,7 +1981,7 @@ GameObject:
   - component: {fileID: 1653824673}
   m_Layer: 0
   m_Name: CamaraMenu
-  m_TagString: MainCamera
+  m_TagString: LobbyCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2190,8 +2188,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -25, y: -30}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: -14.041, y: -22.5}
+  m_SizeDelta: {x: 251.74, y: 45}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1745375859
 MonoBehaviour:
@@ -2328,6 +2326,79 @@ MonoBehaviour:
   maxVariacionX: 4
   minAlturaY: 0.5
   maxAlturaY: 3.5
+  currentState:
+    m_InternalValue: 0
+  countdownTimer:
+    m_InternalValue: 3
+  winnerName:
+    m_InternalValue:
+      utf8LengthInBytes: 0
+      bytes:
+        offset0000:
+          byte0000: 0
+          byte0001: 0
+          byte0002: 0
+          byte0003: 0
+          byte0004: 0
+          byte0005: 0
+          byte0006: 0
+          byte0007: 0
+          byte0008: 0
+          byte0009: 0
+          byte0010: 0
+          byte0011: 0
+          byte0012: 0
+          byte0013: 0
+          byte0014: 0
+          byte0015: 0
+        offset0016:
+          byte0000: 0
+          byte0001: 0
+          byte0002: 0
+          byte0003: 0
+          byte0004: 0
+          byte0005: 0
+          byte0006: 0
+          byte0007: 0
+          byte0008: 0
+          byte0009: 0
+          byte0010: 0
+          byte0011: 0
+          byte0012: 0
+          byte0013: 0
+          byte0014: 0
+          byte0015: 0
+        offset0032:
+          byte0000: 0
+          byte0001: 0
+          byte0002: 0
+          byte0003: 0
+          byte0004: 0
+          byte0005: 0
+          byte0006: 0
+          byte0007: 0
+          byte0008: 0
+          byte0009: 0
+          byte0010: 0
+          byte0011: 0
+          byte0012: 0
+          byte0013: 0
+          byte0014: 0
+          byte0015: 0
+        byte0048: 0
+        byte0049: 0
+        byte0050: 0
+        byte0051: 0
+        byte0052: 0
+        byte0053: 0
+        byte0054: 0
+        byte0055: 0
+        byte0056: 0
+        byte0057: 0
+        byte0058: 0
+        byte0059: 0
+        byte0060: 0
+        byte0061: 0
 --- !u!114 &1800175047
 MonoBehaviour:
   m_ObjectHideFlags: 0

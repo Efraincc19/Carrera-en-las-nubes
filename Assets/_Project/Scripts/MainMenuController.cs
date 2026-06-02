@@ -51,7 +51,7 @@ public class MainMenuController : MonoBehaviour
         {
             NetworkManager.Singleton.StartHost();
             HideMenu();
-            ShowMobileControls();
+            // Los controles se muestran cuando empiece la carrera
         }
         else
         {
@@ -77,7 +77,7 @@ public class MainMenuController : MonoBehaviour
 
         NetworkManager.Singleton.StartClient();
         HideMenu();
-        ShowMobileControls();
+        // Los controles se muestran cuando empiece la carrera
     }
 
     private void ShowMobileControls()
@@ -86,6 +86,16 @@ public class MainMenuController : MonoBehaviour
         {
             mobileControlsCanvas.SetActive(true);
         }
+    }
+
+    void Update()
+    {
+        // Mostrar controles solo durante la carrera
+        if (mobileControlsCanvas == null) return;
+        if (CloudSpawner.Instance == null) return;
+        bool racing = CloudSpawner.Instance.IsSpawned &&
+                      CloudSpawner.Instance.currentState.Value == CloudSpawner.GameState.Racing;
+        mobileControlsCanvas.SetActive(racing);
     }
 
     private void HideMenu()
