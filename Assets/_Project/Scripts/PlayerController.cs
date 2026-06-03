@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using Unity.Netcode;
 using Unity.Collections;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -49,9 +50,7 @@ public class PlayerController : NetworkBehaviour
     public AudioClip sonidoPunto;
 
     private int saltosRestantes = 2;
-    private CloudSpawner cloudSpawner;
     private PlayerInput playerInput;
-    private InputAction jumpInputAction;
     private Vector2 moveInput;
     private Rigidbody rb;
     private bool isGrounded;
@@ -76,13 +75,16 @@ public class PlayerController : NetworkBehaviour
         float myOffsetX = OwnerClientId * 30f;
         if (IsServer || IsOwner)
         {
-            Vector3 pos = new Vector3(myOffsetX, 2f, 0f);
+            Vector3 pos = new Vector3(myOffsetX, 5f, 0f);
             transform.position = pos;
             if (rb == null) rb = GetComponent<Rigidbody>();
             if (rb != null) rb.position = pos;
         }
 
         Debug.Log($"[PlayerController OnNetworkSpawn] ClientId={OwnerClientId}, IsOwner={IsOwner}, IsServer={IsServer}");
+
+        // ── Asignar skin según rol: Host = Hollow Knight, Invitado = Hornet (Silksong) ──
+        ApplyCharacterSkin();
 
         // Asegurar que encontramos la cámara
         if (playerCamera == null)
@@ -96,77 +98,20 @@ public class PlayerController : NetworkBehaviour
 
         // Habilitar el PlayerInput solo para el dueño, y desactivarlo para clones
         if (playerInput != null)
-        {
             playerInput.enabled = IsOwner;
-            Debug.Log($"[PlayerController] PlayerInput habilitado para IsOwner={IsOwner}");
-        }
 
-        // Solo el dueño (quien controla este jugador) necesita ver a través de su cámara
         if (IsOwner)
         {
-            Debug.Log($"[PlayerController] Soy el dueño (ClientId={OwnerClientId}). Activando cámara...");
-            
-            if (playerCamera == null)
-            {
-                Debug.LogError($"[PlayerController] ❌ NO se encontró Camera en el prefab del jugador {OwnerClientId}. Revisa que exista una cámara hija y que el prefab tenga Camera activa o un componente Camera desactivado.");
-            }
-            else
-            {
-                Debug.Log($"[PlayerController] ✓ Cámara encontrada: {playerCamera.name}");
-            }
-
-            // Desactivar cámara de lobby cuando el jugador se conecta
-            if (CameraManager.Instance != null)
-            {
-                Debug.Log("[PlayerController] Desactivando cámara de lobby...");
-                CameraManager.Instance.DeactivateLobbyCamera();
-            }
-            else
-            {
-                Debug.LogWarning("[PlayerController] ⚠ CameraManager.Instance es NULL");
-            }
-
-            // Activar la cámara de este jugador
-            if (playerCamera != null)
-            {
-                playerCamera.gameObject.SetActive(true);
-                playerCamera.enabled = true;
-                currentCameraRotX = rotacionCamara.x;
-                currentCameraRotY = rotacionCamara.y;
-                Debug.Log($"[PlayerController] ✓ Cámara activada: {playerCamera.gameObject.name}");
-            }
-
-            if (playerAudioListener != null)
-                playerAudioListener.enabled = true;
+            // Configurar cámara con un frame de delay para evitar race conditions
+            StartCoroutine(SetupCameraDelayed());
 
             if (hudCanvas != null)
                 hudCanvas.SetActive(true);
             UpdateScoreUI();
-
-            // Desactivar cámaras de otros jugadores (solo las de red)
-            Camera[] allCameras = FindObjectsOfType<Camera>();
-            Debug.Log($"[PlayerController] Total de cámaras encontradas: {allCameras.Length}");
-            foreach (Camera cam in allCameras)
-            {
-                // No tocar: mi cámara, cámaras del lobby, cámaras que no son de jugadores
-                if (cam == playerCamera) continue;
-                
-                if (CameraManager.Instance != null && CameraManager.Instance.IsLobbyCamera(cam))
-                    continue;
-
-                NetworkObject camNetObj = cam.GetComponentInParent<NetworkObject>();
-                if (camNetObj != null && camNetObj != GetComponent<NetworkObject>())
-                {
-                    cam.gameObject.SetActive(false);
-                    Debug.Log($"[PlayerController] Desactivada cámara de otro jugador: {cam.name}");
-                }
-            }
         }
         else
         {
-            Debug.Log($"[PlayerController] No soy el dueño (IsOwner=false, ClientId={OwnerClientId}). Desactivando componentes...");
-            
-            // Este jugador NO es el dueño
+            // Este jugador NO es el dueño — desactivar su cámara y HUD
             if (playerCamera != null)
                 playerCamera.gameObject.SetActive(false);
             
@@ -175,8 +120,89 @@ public class PlayerController : NetworkBehaviour
             
             if (hudCanvas != null)
                 hudCanvas.SetActive(false);
-            
-            // playerInput ya fue desactivado arriba si no es dueño
+        }
+    }
+
+    /// <summary>
+    /// Configura la cámara del jugador con un frame de delay para que todos los
+    /// NetworkObjects estén spawneados antes de buscar y desactivar otras cámaras.
+    /// </summary>
+    private IEnumerator SetupCameraDelayed()
+    {
+        yield return null; // Esperar un frame
+
+        if (!IsOwner) yield break;
+
+        // Buscar la cámara si no está asignada
+        if (playerCamera == null)
+            playerCamera = GetComponentInChildren<Camera>(true);
+
+        if (playerAudioListener == null && playerCamera != null)
+            playerAudioListener = playerCamera.GetComponent<AudioListener>();
+
+        if (playerCamera == null)
+        {
+            Debug.LogError($"[PlayerController] ❌ NO se encontró Camera en el prefab del jugador {OwnerClientId}");
+            yield break;
+        }
+
+        // Desactivar cámara de lobby
+        if (CameraManager.Instance != null)
+            CameraManager.Instance.DeactivateLobbyCamera();
+
+        // Activar MI cámara
+        playerCamera.gameObject.SetActive(true);
+        playerCamera.enabled = true;
+        currentCameraRotX = rotacionCamara.x;
+        currentCameraRotY = rotacionCamara.y;
+
+        if (playerAudioListener != null)
+            playerAudioListener.enabled = true;
+
+        // Desactivar cámaras de OTROS jugadores (solo el componente Camera, no el GameObject)
+        Camera[] allCameras = FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (Camera cam in allCameras)
+        {
+            if (cam == playerCamera) continue;
+            if (CameraManager.Instance != null && CameraManager.Instance.IsLobbyCamera(cam)) continue;
+
+            NetworkObject camNetObj = cam.GetComponentInParent<NetworkObject>();
+            if (camNetObj != null && camNetObj != GetComponent<NetworkObject>())
+            {
+                cam.enabled = false; // Solo desactivar componente, no el GameObject entero
+                AudioListener al = cam.GetComponent<AudioListener>();
+                if (al != null) al.enabled = false;
+            }
+        }
+
+        Debug.Log($"[PlayerController] ✓ Cámara configurada para jugador {OwnerClientId}");
+    }
+
+    /// <summary>
+    /// Asigna la skin correcta según el rol del jugador.
+    /// Host (ServerClientId) = Hollow Knight (el Caballero)
+    /// Invitados = Hornet (Silksong)
+    /// Se ejecuta en TODAS las copias para que todos vean las skins correctas.
+    /// </summary>
+    private void ApplyCharacterSkin()
+    {
+        // Limpiar skins existentes para evitar duplicados
+        var existingKnight = GetComponent<HollowKnightSkin>();
+        if (existingKnight != null) Destroy(existingKnight);
+        var existingHornet = GetComponent<SilksongSkin>();
+        if (existingHornet != null) Destroy(existingHornet);
+
+        // Host (ClientId 0 / ServerClientId) → Caballero de Hollow Knight
+        // Invitados → Hornet de Silksong
+        if (OwnerClientId == NetworkManager.ServerClientId)
+        {
+            gameObject.AddComponent<HollowKnightSkin>();
+            Debug.Log($"[PlayerController] Skin asignada: Hollow Knight (Host) para jugador {OwnerClientId}");
+        }
+        else
+        {
+            gameObject.AddComponent<SilksongSkin>();
+            Debug.Log($"[PlayerController] Skin asignada: Hornet/Silksong (Invitado) para jugador {OwnerClientId}");
         }
     }
 
@@ -191,25 +217,9 @@ public class PlayerController : NetworkBehaviour
         Debug.Log($"[PlayerController Awake] Prefab inicializado. Camera encontrada: {(playerCamera != null ? playerCamera.name : "NINGUNA")}");
     }
 
-    private void OnEnable()
-    {
-        if (playerInput != null)
-        {
-            jumpInputAction = playerInput.actions.FindAction("Jump");
-            if (jumpInputAction != null)
-                jumpInputAction.performed += OnJumpAction;
-        }
-    }
-
-    private void OnDisable()
-    {
-        if (jumpInputAction != null)
-            jumpInputAction.performed -= OnJumpAction;
-    }
 
     void Start()
     {
-        cloudSpawner = FindObjectOfType<CloudSpawner>();
         rb.freezeRotation = true;
     }
 
@@ -245,16 +255,6 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    private void OnJumpAction(InputAction.CallbackContext context)
-    {
-        if (!IsOwner) return;
-        if (context.performed)
-        {
-            TryLocalJump();
-            if (!IsServer) SubmitJumpServerRpc();
-        }
-    }
-
     private void TryLocalJump()
     {
         // Para predecir localmente (opcional) pero garantizamos que llegue al server
@@ -272,21 +272,10 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    private bool hasInitializedPos = false;
-
     void Update()
     {
         // El chequeo del piso lo hace el Servidor
         if (!IsServer) return;
-
-        if (!hasInitializedPos)
-        {
-            float myOffsetX = OwnerClientId * 30f;
-            Vector3 pos = new Vector3(myOffsetX, 5f, 0f);
-            transform.position = pos;
-            if (rb != null) rb.position = pos;
-            hasInitializedPos = true;
-        }
 
         if (groundCheck != null)
         {
@@ -303,19 +292,20 @@ public class PlayerController : NetworkBehaviour
 
     private void CheckCloudPointsBasedOnZPosition()
     {
-        // Obtener todas las nubes en la escena
-        GameObject[] allClouds = GameObject.FindGameObjectsWithTag("Cloud");
-        float currentPlayerZ = transform.position.z;
-        float pointGiveThreshold = 2f; // Cuando el jugador pase 2 unidades más allá de la nube
+        // Usar la lista cacheada de nubes del propio carril en vez de buscar por tag cada frame
+        if (CloudSpawner.Instance == null) return;
+        List<GameObject> myClouds = CloudSpawner.Instance.GetCloudsForPlayer(OwnerClientId);
 
-        foreach (GameObject cloud in allClouds)
+        float currentPlayerZ = transform.position.z;
+        float pointGiveThreshold = 2f;
+
+        foreach (GameObject cloud in myClouds)
         {
+            if (cloud == null) continue;
             float cloudZ = cloud.transform.position.z;
 
-            // Si el jugador ya pasó esta nube (y está a más de threshold unidades)
             if (currentPlayerZ > cloudZ + pointGiveThreshold && cloudZ > lastProcessedCloudZ)
             {
-                // Sumar punto
                 score.Value++;
                 lastProcessedCloudZ = cloudZ;
                 UpdateScoreClientRpc(score.Value);
@@ -323,13 +313,10 @@ public class PlayerController : NetworkBehaviour
                 if (audioSource != null && sonidoPunto != null)
                     audioSource.PlayOneShot(sonidoPunto);
 
-                // Verificar condición de victoria
                 if (score.Value >= 50 && CloudSpawner.Instance != null)
                 {
                     CloudSpawner.Instance.NotifyPlayerWon(OwnerClientId, playerName.Value.ToString());
                 }
-
-                Debug.Log($"Punto sumado! Score: {score.Value}/50");
             }
         }
     }
@@ -339,9 +326,9 @@ public class PlayerController : NetworkBehaviour
         // En Netcode por defecto las físicas son del Servidor
         if (!IsServer) return;
 
-        if (rb.position.y < -15f)
+        if (rb.position.y < -10f)
         {
-            Vector3 safePos = rb.position;
+            Vector3 safePos;
             if (CloudSpawner.Instance != null)
             {
                 safePos = CloudSpawner.Instance.GetSafeRespawnPosition(OwnerClientId, rb.position.z);

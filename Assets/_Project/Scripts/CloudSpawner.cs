@@ -55,7 +55,8 @@ public class CloudSpawner : NetworkBehaviour
             Debug.Log("[CloudSpawner] CameraManager ya existe");
         }
         // Agregar la UI del lobby automáticamente
-        gameObject.AddComponent<LobbyUI>();
+        if (GetComponent<LobbyUI>() == null)
+            gameObject.AddComponent<LobbyUI>();
     }
 
     public void NotifyPlayerWon(ulong clientId, string name)
@@ -343,6 +344,16 @@ public class CloudSpawner : NetworkBehaviour
         {
             ApplyGoalStyleLocally(netObj.gameObject);
         }
+    }
+
+    /// <summary>
+    /// Devuelve la lista de nubes activas de un jugador específico.
+    /// </summary>
+    public List<GameObject> GetCloudsForPlayer(ulong clientId)
+    {
+        if (playerTracks.TryGetValue(clientId, out PlayerTrack track))
+            return track.activeClouds;
+        return new List<GameObject>();
     }
 
     public void CheckIfTrap(GameObject cloud)

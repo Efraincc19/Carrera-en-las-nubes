@@ -1,8 +1,6 @@
-using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-public class MenuCloudSpawner : NetworkBehaviour // (No necesita Netcode, pero lo dejamos por si acaso)
+public class MenuCloudSpawner : MonoBehaviour
 {
     [Header("Prefabs de las Nubes")]
     public GameObject[] nubesPrefabs;
