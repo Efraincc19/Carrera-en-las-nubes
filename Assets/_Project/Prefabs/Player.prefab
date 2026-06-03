@@ -309,8 +309,8 @@ MonoBehaviour:
     m_Bits: 4294967295
   groundCheck: {fileID: 653247499230832478}
   groundDistance: 0.2
-  playerCamera: {fileID: 0}
-  playerAudioListener: {fileID: 0}
+  playerCamera: {fileID: 5184283201758444887}
+  playerAudioListener: {fileID: 2037726361746613917}
   offsetCamara: {x: 0, y: 3.5, z: -6}
   rotacionCamara: {x: 20, y: 0, z: 0}
   hudCanvas: {fileID: 5532428832452788526}
