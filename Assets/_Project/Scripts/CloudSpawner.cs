@@ -209,7 +209,7 @@ public class CloudSpawner : NetworkBehaviour
 
         if (go.TryGetComponent<NetworkObject>(out NetworkObject netObj))
         {
-            netObj.Spawn();
+            if (!netObj.IsSpawned) netObj.Spawn();
             if (isGoal)
             {
                 // Aplicar color amarillo a la meta
@@ -320,6 +320,10 @@ public class CloudSpawner : NetworkBehaviour
             if (track.activeClouds[0] != null)
             {
                 trapClouds.Remove(track.activeClouds[0]);
+                if (track.activeClouds[0].TryGetComponent<NetworkObject>(out var netObj))
+                {
+                    netObj.Despawn();
+                }
                 Destroy(track.activeClouds[0]);
             }
             track.activeClouds.RemoveAt(0);
@@ -421,7 +425,11 @@ public class CloudSpawner : NetworkBehaviour
             foreach (GameObject cloud in track.activeClouds)
             {
                 trapClouds.Remove(cloud);
-                if (cloud != null) Destroy(cloud);
+                if (cloud != null)
+                {
+                    if (cloud.TryGetComponent<NetworkObject>(out var netObj)) netObj.Despawn();
+                    Destroy(cloud);
+                }
             }
         }
 

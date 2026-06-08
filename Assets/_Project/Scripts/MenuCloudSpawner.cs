@@ -48,6 +48,12 @@ public class MenuCloudSpawner : MonoBehaviour
 
         // 2. Crear el clon
         GameObject nuevaNube = Instantiate(nubesPrefabs[indiceAleatorio], posicionSpawn, Quaternion.identity);
+        
+        // ELIMINAR NetworkObject para que no choque con el sistema de red en el menú
+        if (nuevaNube.TryGetComponent<Unity.Netcode.NetworkObject>(out var netObj))
+        {
+            Destroy(netObj);
+        }
 
         // 3. Inyectar movimiento
         MenuCloud componenteMovimiento = nuevaNube.AddComponent<MenuCloud>();
@@ -68,6 +74,12 @@ public class MenuCloudSpawner : MonoBehaviour
 
         Vector3 posicionSpawn = new Vector3(xAleatoria, alturaAleatoria, transform.position.z);
         GameObject nuevaNube = Instantiate(nubesPrefabs[indiceAleatorio], posicionSpawn, Quaternion.identity);
+
+        // ELIMINAR NetworkObject para que no choque con el sistema de red en el menú
+        if (nuevaNube.TryGetComponent<Unity.Netcode.NetworkObject>(out var netObj))
+        {
+            Destroy(netObj);
+        }
 
         MenuCloud componenteMovimiento = nuevaNube.AddComponent<MenuCloud>();
         float velocidadAleatoria = Random.Range(velocidadMinima, velocidadMaxima);
